@@ -1,16 +1,11 @@
 import dotenv from 'dotenv';
-import { ConnectOptions } from 'mongoose';
 
-dotenv.config({path: '.env'});
 
-// const mongoOpts: ConnectOptions = {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//     useCreateIndex: true
-// }
+//This is not working, Im getting the env vars from the windows variables
+dotenv.config({ path: '.env'});
 
 const mongoConfig = {
-    url: `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PWD}@cluster0.kv39d5y.mongodb.net/Formacao?retryWrites=true&w=majority`
+    url: `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.kv39d5y.mongodb.net/Formacao?retryWrites=true&w=majority`
 }
 
 export default mongoConfig;
