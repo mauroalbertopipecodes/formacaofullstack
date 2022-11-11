@@ -23,8 +23,7 @@ const User: Schema = new mongoose.Schema({
     required: true
    },
    access_token: {
-    type: String,
-    required: true
+    type: String
    },
 }, {timestamps: true});
 
