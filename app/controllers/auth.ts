@@ -1,49 +1,61 @@
-import {Request, Response, NextFunction} from 'express';
+import {Request, Response} from 'express';
 import User from "../models/User";
 import bcrypt from "bcryptjs";
-import mongoose from "mongoose";
+import dotenv from 'dotenv';
 import jwt from "jsonwebtoken";
 import secret from "../config/secret";
-import dotenv from 'dotenv';
 
 dotenv.config({ path: '.env'});
+const jwtExpirySeconds = 3600;
 
 const signup = async(req: Request, res: Response) => {
-    if(!req.body.name || !req.body.email || !req.body.password){
-        return res.status(400).send({message: "Content can to be empty"});
+    const { name, email, password } = req.body
+    if( !name || !email || !password ) {
+        return res.status(400).send({message: 'Content cannot be empty'});
     }
-
+​
     const newUser = new User({
-        name: req.body.name,
-        email: req.body.email,
-        password: bcrypt.hashSync(req.body.password,8)
+        name: name,
+        email: email,
+        password: bcrypt.hashSync(password,8),
     });
-
+​
     newUser.save((err, user) => {
-        if(err) res.status(502).send({message: "Erro", err})
-        res.status(200).send({message: "Utilizador criado com sucesso"})
-    })
-
+        if(err) res.status(502).send({message: "Error. Bad gateway", err});
+        return res.status(200).send({message: "User created sucessfully!"});
+    });
 };
 
 const signin = async(req: Request, res: Response) => {
-    
-    if(!req.body.email || !req.body.password){
-        return res.status(400).send({message: "Content can't be empty"});
+    const { email, password } = req.body
+    if( !email || !password ) {
+        return res.status(400).send({message: "Incorrect Email or Password!"});
     }
-    const username = req.body.email;
-    let token = process.env.ACCESS_TOKEN_SECRET;
-    let user = mongoose.model("User");
-    user.find({email: req.body.email, password: req.body.password}, (err: any,data: any) => {
-        if(err){
-            console.log("err", err);
-            return res.status(204).json({message: "User with that email does not exists " + err})
-        } else {
-            const accessToken = jwt.sign(username, token)
-            console.log(data);
-            return res.status(200).json({message: "Login Successful.", accessToken: accessToken}) 
+    
+    const user = await User.findOne({ email });
+    const access_token = jwt.sign({ email }, secret, {
+		algorithm: "HS256",
+		expiresIn: jwtExpirySeconds,
+	})
+
+    if (!user) {
+        return res.status(401).json({
+        message: "Login not successful",
+        error: "User not found",
+        })
+    }
+    bcrypt.compare(password, user.password).then((result) => {
+        if(result){
+           return res.status(200).json({
+                message: "Login successful",
+                access_token,
+            })
         }
-    }); 
+        else {
+            return res.status(400).json({ message: "Login not succesful" })
+        }
+            
+    })
 }
 
 export default {signup,signin};

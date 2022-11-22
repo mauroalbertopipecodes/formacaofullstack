@@ -27,5 +27,6 @@ const User: Schema = new mongoose.Schema({
    },
 }, {timestamps: true});
 
-export default mongoose.model<IUser>('User', User, 'users')
+export default mongoose.model<IUser>('User', User, 'Users')
 
+//ORM SEqualize.
