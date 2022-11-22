@@ -2,6 +2,7 @@ import mongoose, {Schema, Document} from "mongoose";
 
 interface ITransaction extends Document {
     id: Number,
+    createdBy: String,
     description: String,
     movementType: String,
     transationType: String,
@@ -9,6 +10,10 @@ interface ITransaction extends Document {
 }
 
 const Transaction: Schema = new mongoose.Schema({
+    createdBy: {
+        type: String,
+        required: true
+    },
    description: {
     type: String,
     required: true
